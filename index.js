@@ -142,11 +142,8 @@ class GenericHttpInstance extends InstanceBase {
 				callback: async (action, context) => {
 					const { url, options } = await this.prepareQuery(context, action, false)
 
-					const userInputUrl = action.options.url;
-					const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers/`;
-
 					try {
-						const response = await got.get(modifiedUrl, options)
+						const response = await got.get(url, options)
 
 						// store json result data into retrieved dedicated custom variable
 						const jsonResultDataVariable = action.options.jsonResultDataVariable
@@ -241,8 +238,11 @@ class GenericHttpInstance extends InstanceBase {
 				callback: async (action, context) => {
 					const { urlnmos, options } = await this.prepareQuery(context, action, false)
 
+					const userInputUrl = action.options.urlnmos;
+					const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers/`;
+
 					try {
-						const response = await got.get(urlnmos, options)
+						const response = await got.get(modifiedUrl, options)
 
 						// store json result data into retrieved dedicated custom variable
 						const jsonResultDataVariable = action.options.jsonResultDataVariable
