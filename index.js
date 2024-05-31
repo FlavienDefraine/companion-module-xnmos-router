@@ -218,6 +218,7 @@ class GenericHttpInstance extends InstanceBase {
 					}
 				},
 			},
+			
 			getSenders: {
 				name: 'GET Senders',
 				options: [
@@ -269,9 +270,64 @@ class GenericHttpInstance extends InstanceBase {
 					}
 				},
 			},
+
+			getReceivers:{
+				name: 'GET Receivers',
+				options: [
+					FIELDS.UrlNMOS(urlLabel),
+					FIELDS.Header,
+					{
+						type: 'custom-variable',
+						label: 'JSON Response Data Variable',
+						id: 'jsonResultDataVariable',
+					},
+					{
+						type: 'checkbox',
+						label: 'JSON Stringify Result',
+						id: 'result_stringify',
+						default: true,
+					},
+				],
+				callback: async (action, context) => {
+					const { urlnmos, options } = await this.prepareQuery(context, action, false)
+
+					const userInputUrl = action.options.urlnmos;
+						const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers/`;
+						try {
+							const response = await got.get(modifiedUrl, options)
+	
+							// store json result data into retrieved dedicated custom variable
+							const jsonResultDataVariable = action.options.jsonResultDataVariable
+							if (jsonResultDataVariable) {
+								this.log('debug', `Writing result to ${jsonResultDataVariable}`)
+	
+								let resultData = response.body
+	
+								if (!action.options.result_stringify) {
+									try {
+										resultData = JSON.parse(resultData)
+									} catch (error) {
+										//error stringifying
+									}
+								}
+	
+								this.setCustomVariableValue(jsonResultDataVariable, resultData)
+							}
+	
+							this.updateStatus(InstanceStatus.Ok)
+						}
+						catch (e) {
+							this.log('error', `HTTP GET Request failed (${e.message})`)
+							this.updateStatus(InstanceStatus.UnknownError, e.code)
+						}
+				},
+
+			}
 		})
 	}
 
+
+	
 	feedbackTimers = {}
 
 	initFeedbacks() {
