@@ -326,17 +326,17 @@ class GenericHttpInstance extends InstanceBase {
 				  FIELDS.UrlNMOS(urlLabel),
 				  FIELDS.Body, // We will use this to send the JSON payload
 				  FIELDS.Header,
-				  FIELDS.ContentType,
+				  FIELDS.ContentType
 				],
 				callback: async (action, context) => {
 					const { urlnmos, options } = await this.prepareQuery(context, action, true)
 
-					const receiversUrl = getReceivers.modifiedUrl;
+					const receiversUrl = getReceivers.callback.modifiedUrl;
 					const receiverId = /*getReceivers.receiverId*/'';
 					const receiverIdUrl = `${receiversUrl}${receiverId}/staged/`;
 			  
 					// Modify the options object to include the required JSON payload
-					const sendersUrl = getSenders.modifiedUrl;
+					const sendersUrl = getSenders.callback.modifiedUrl;
 					const senderId = /*getSenders.senderId*/'';
 					const senderIdUrl = `${sendersUrl}${senderId}`;
 					const sdpString = JSON.stringify(`${senderIdUrl}/transportfile/`); // Replace this with the actual SDP string
@@ -346,18 +346,18 @@ class GenericHttpInstance extends InstanceBase {
 						master_enable: true,
 						activation: {
 							mode: 'activate_immediate',
-							requested_time: null,
+							requested_time: null
 						},
 						tranport_file: {
 							data: sdpString,
-							type: "application/sdp"
-						},
+							type: "application/sdp",
+						}
 					});
 			  
-					options.body = jsonPayload;
-					options.headers = {
+					action.options.body = jsonPayload;
+					action.options.header = {
 						'Content-Type': 'application/json',
-						...options.headers,
+						...action.options.header,
 					};
 			  
 					try {
