@@ -269,6 +269,107 @@ class GenericHttpInstance extends InstanceBase {
 					}
 				},
 			},
+			getSenders: {
+				name: 'GET Senders',
+				options: [
+					FIELDS.UrlNMOS(urlLabel),
+					FIELDS.Header,
+					{
+						type: 'custom-variable',
+						label: 'JSON Response Data Variable',
+						id: 'jsonResultDataVariable',
+					},
+					{
+						type: 'checkbox',
+						label: 'JSON Stringify Result',
+						id: 'result_stringify',
+						default: true,
+					},
+				],
+				callback: async (action, context) => {
+					const { urlnmos, options } = await this.prepareQuery(context, action, false)
+
+					const userInputUrl = action.options.urlnmos;
+					const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders/`;
+
+					try {
+						const response = await got.get(modifiedUrl, options)
+
+						// store json result data into retrieved dedicated custom variable
+						const jsonResultDataVariable = action.options.jsonResultDataVariable
+						if (jsonResultDataVariable) {
+							this.log('debug', `Writing result to ${jsonResultDataVariable}`)
+
+							let resultData = response.body
+
+							if (!action.options.result_stringify) {
+								try {
+									resultData = JSON.parse(resultData)
+								} catch (error) {
+									//error stringifying
+								}
+							}
+
+							this.setCustomVariableValue(jsonResultDataVariable, resultData)
+						}
+
+						this.updateStatus(InstanceStatus.Ok)
+					} catch (e) {
+						this.log('error', `HTTP GET Request failed (${e.message})`)
+						this.updateStatus(InstanceStatus.UnknownError, e.code)
+					}
+				},
+			},
+			patchTake: {
+				name: 'PATCH Take',
+				options: [
+				  FIELDS.UrlNMOS(urlLabel),
+				  FIELDS.Body, // We will use this to send the JSON payload
+				  FIELDS.Header,
+				  FIELDS.ContentType,
+				],
+				callback: async (action, context) => {
+					const { urlnmos, options } = await this.prepareQuery(context, action, true)
+
+					const receiversUrl = getReceivers.modifiedUrl;
+					const receiverId = /*getReceivers.receiverId*/'';
+					const receiverIdUrl = `${receiversUrl}${receiverId}/staged/`;
+			  
+					// Modify the options object to include the required JSON payload
+					const sendersUrl = getSenders.modifiedUrl;
+					const senderId = /*getSenders.senderId*/'';
+					const senderIdUrl = `${sendersUrl}${senderId}`;
+					const sdpString = JSON.stringify(`${senderIdUrl}/transportfile/`); // Replace this with the actual SDP string
+			  
+					const jsonPayload = JSON.stringify({
+						sender_id: senderId,
+						master_enable: true,
+						activation: {
+							mode: 'activate_immediate',
+							requested_time: null,
+						},
+						tranport_file: {
+							data: sdpString,
+							type: "application/sdp"
+						},
+					});
+			  
+					options.body = jsonPayload;
+					options.headers = {
+						'Content-Type': 'application/json',
+						...options.headers,
+					};
+			  
+					try {
+						await got.patch(receiverIdUrl, options)
+			  
+						this.updateStatus(InstanceStatus.Ok)
+					} catch (e) {
+						this.log('error', `HTTP PATCH Request failed (${e.message})`)
+						this.updateStatus(InstanceStatus.UnknownError, e.code)
+					}
+				},
+			},
 		})
 	}
 
