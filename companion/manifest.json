@@ -1,0 +1,32 @@
+{
+	"id": "ina-xnmos-router",
+	"name": "ina-xnmos-router",
+	"shortname": "ina-xnmos-router",
+	"description": "2110 router throught http requests on nmos serveur",
+	"version": "0.0.2",
+	"license": "MIT",
+	"repository": "git+https://github.com/Luadei/companion-module-ina-xnmos-router.git",
+	"bugs": "https://github.com/Luadei/companion-module-ina-xnmos-router/issues",
+	"maintainers": [
+		{
+			"name": "Luadei",
+			"email": "lucas.despin@ensea.fr"
+		}
+	],
+	"legacyIds": [],
+	"runtime": {
+		"type": "node18",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../index.js"
+	},
+	"manufacturer": "INA",
+	"products": [
+		"XNMOS Router"
+	],
+	"keywords": [
+		"INA",
+		"XNMOS",
+		"Router"
+	]
+}

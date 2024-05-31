@@ -1,0 +1,22 @@
+{
+	"name": "ina-xnmos-router",
+	"version": "0.0.1",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Luadei/companion-module-ina-xnmos-router.git"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"@companion-module/base": "~1.4.1",
+		"got": "^12.6.0",
+		"jimp": "^0.22.7"
+	},
+	"devDependencies": {
+		"@companion-module/tools": "^1.2.0"
+	}
+}
