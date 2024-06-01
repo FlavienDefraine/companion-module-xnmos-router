@@ -239,7 +239,7 @@ class GenericHttpInstance extends InstanceBase {
 					const { urlnmos, options } = await this.prepareQuery(context, action, false)
 
 					const userInputUrl = action.options.urlnmos;
-					const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers/`;
+					const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;
 
 					try {
 						const response = await got.get(modifiedUrl, options)
@@ -290,7 +290,7 @@ class GenericHttpInstance extends InstanceBase {
 					const { urlnmos, options } = await this.prepareQuery(context, action, false)
 
 					const userInputUrl = action.options.urlnmos;
-					const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders/`;
+					const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;
 
 					try {
 						const response = await got.get(modifiedUrl, options)
@@ -331,40 +331,46 @@ class GenericHttpInstance extends InstanceBase {
 				callback: async (action, context) => {
 					const { urlnmos, options } = await this.prepareQuery(context, action, true)
 
-					const receiversUrl = getReceivers.callback.modifiedUrl;
+					const userInputUrl = action.options.urlnmos;
+
+					const modifiedReceiversUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;
 					const receiverId = /*getReceivers.receiverId*/'';
-					const receiverIdUrl = `${receiversUrl}${receiverId}/staged/`;
+					const receiverIdUrl = `${modifiedReceiversUrl}/${receiverId}/staged`;
 			  
 					// Modify the options object to include the required JSON payload
-					const sendersUrl = getSenders.callback.modifiedUrl;
+					const modifiedSendersUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;
 					const senderId = /*getSenders.senderId*/'';
-					const senderIdUrl = `${sendersUrl}${senderId}`;
-					const sdpString = JSON.stringify(`${senderIdUrl}/transportfile/`); // Replace this with the actual SDP string
-			  
-					const jsonPayload = JSON.stringify({
-						sender_id: senderId,
-						master_enable: true,
-						activation: {
-							mode: 'activate_immediate',
-							requested_time: null
-						},
-						tranport_file: {
-							data: sdpString,
-							type: "application/sdp",
-						}
-					});
-			  
-					action.options.body = jsonPayload;
-					action.options.header = {
-						'Content-Type': 'application/json',
-						...action.options.header,
-					};
-			  
+					const senderIdUrl = `${modifiedSendersUrl}/${senderId}`;
+					const sdpUrl = `${senderIdUrl}/transportfile`;
+
 					try {
+						const sdpFile = await fetch(sdpUrl);
+						const sdpString = await sdpFile.text();
+
+						const jsonPayload = JSON.stringify({
+							sender_id: senderId,
+							master_enable: true,
+							activation: {
+								mode: 'activate_immediate',
+								requested_time: null
+							},
+							tranport_file: {
+								data: sdpString,
+								type: "application/sdp",
+							}
+						});
+			  
+						action.options.body = jsonPayload;
+						action.options.header = {
+							'Content-Type': 'application/json',
+							...action.options.header,
+						};
+
 						await got.patch(receiverIdUrl, options)
 			  
 						this.updateStatus(InstanceStatus.Ok)
 					} catch (e) {
+						this.log('error', `Error downloading file: ${e}`)
 						this.log('error', `HTTP PATCH Request failed (${e.message})`)
 						this.updateStatus(InstanceStatus.UnknownError, e.code)
 					}
