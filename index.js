@@ -337,7 +337,6 @@ class GenericHttpInstance extends InstanceBase {
 					const receiverId = '';
 					const receiverIdUrl = `${modifiedReceiversUrl}/${receiverId}/staged`;
 			  
-					// Modify the options object to include the required JSON payload
 					const modifiedSendersUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;
 					const senderId = '';
 					const senderIdUrl = `${modifiedSendersUrl}/${senderId}`;
