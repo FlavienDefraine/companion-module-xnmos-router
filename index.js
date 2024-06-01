@@ -334,12 +334,12 @@ class GenericHttpInstance extends InstanceBase {
 					const userInputUrl = action.options.urlnmos;
 
 					const modifiedReceiversUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;
-					const receiverId = /*getReceivers.receiverId*/'';
+					const receiverId = '';
 					const receiverIdUrl = `${modifiedReceiversUrl}/${receiverId}/staged`;
 			  
 					// Modify the options object to include the required JSON payload
 					const modifiedSendersUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;
-					const senderId = /*getSenders.senderId*/'';
+					const senderId = '';
 					const senderIdUrl = `${modifiedSendersUrl}/${senderId}`;
 					const sdpUrl = `${senderIdUrl}/transportfile`;
 
