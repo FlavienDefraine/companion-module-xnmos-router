@@ -304,13 +304,28 @@ class GenericHttpInstance extends InstanceBase {
 
 							if (!action.options.result_stringify) {
 								try {
-									resultData = JSON.parse(resultData)
+									resultData = resultData.split(",");
 								} catch (error) {
 									//error stringifying
 								}
 							}
-
+							
 							this.setCustomVariableValue(jsonResultDataVariable, resultData)
+
+							// Crée les variables personnalisées dynamiquement
+							const variablesDefinitions = []; // déclare le tableau avant la boucle
+
+							for (let i = 0; i < resultData.length; i++) {
+  								variablesDefinitions.push({ // utilise push pour ajouter un nouvel élément au tableau
+    								id: `sender-${i}`,
+								    name: `Sender ${i + 1}`,
+								    type: 'string',
+    								value: resultData[i],
+  								});
+							}
+
+							// Crée la variable personnalisée
+							this.setVariableDefinitions(variablesDefinitions);
 						}
 
 						this.updateStatus(InstanceStatus.Ok)
