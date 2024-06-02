@@ -12,8 +12,93 @@ class GenericHttpInstance extends InstanceBase {
 	configUpdated(config) {
 		this.config = config
 
+		this.executeGetSenders(config);
+		this.executeGetReceivers(config);
+
 		this.initActions()
 		this.initFeedbacks()
+	}
+
+	async executeGetSenders(config) {
+		const userInputUrl = config.prefix;
+		const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;  
+		const options = {
+			
+		};
+	  
+		try {
+		  	const response = await got.get(modifiedUrl, options);
+	  
+			let resultData = response.body;
+			let resultArray = new Array();
+	  
+			try {
+				resultArray = resultData.split(",");
+			} catch (error) {
+				// error stringifying
+			}
+	  
+			// Crée les variables personnalisées dynamiquement
+			let variablesDefinitions = new Array();
+	  
+			for (let i = 0; i < resultArray.length; i++) {
+			  	variablesDefinitions.push({
+					id: `sender-${i}`,
+					name: `Sender ${i + 1}`,
+					type: 'string',
+					value: resultData[i],
+			  	});
+			}
+	  
+			// Crée la variable personnalisée
+			this.setVariableDefinitions(variablesDefinitions);
+	  
+		  	this.updateStatus(InstanceStatus.Ok);
+		} catch (e) {
+		  	this.log('error', `HTTP GET Request failed (${e.message})`);
+		  	this.updateStatus(InstanceStatus.UnknownError, e.code);
+		}
+	}
+
+	async executeGetReceivers(config) {
+		const userInputUrl = config.prefix;
+		const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;  
+		const options = {
+			
+		};
+	  
+		try {
+		  	const response = await got.get(modifiedUrl, options);
+	  
+			let resultData = response.body;
+			let resultArray = new Array();
+	  
+			try {
+				resultArray = resultData.split(",");
+			} catch (error) {
+				// error stringifying
+			}
+	  
+			// Crée les variables personnalisées dynamiquement
+			let variablesDefinitions = new Array();
+	  
+			for (let i = 0; i < resultArray.length; i++) {
+			  	variablesDefinitions.push({
+					id: `receiver-${i}`,
+					name: `Receiver ${i + 1}`,
+					type: 'string',
+					value: resultData[i],
+			  	});
+			}
+	  
+			// Crée la variable personnalisée
+			this.setVariableDefinitions(variablesDefinitions);
+	  
+		  	this.updateStatus(InstanceStatus.Ok);
+		} catch (e) {
+		  	this.log('error', `HTTP GET Request failed (${e.message})`);
+		  	this.updateStatus(InstanceStatus.UnknownError, e.code);
+		}
 	}
 
 	init(config) {
@@ -218,7 +303,7 @@ class GenericHttpInstance extends InstanceBase {
 					}
 				},
 			},
-			getReceivers: {
+			/*getReceivers: {
 				name: 'GET Receivers',
 				options: [
 					FIELDS.UrlNMOS(urlLabel),
@@ -268,8 +353,8 @@ class GenericHttpInstance extends InstanceBase {
 						this.updateStatus(InstanceStatus.UnknownError, e.code)
 					}
 				},
-			},
-			getSenders: {
+			},*/
+			/*getSenders: {
 				name: 'GET Senders',
 				options: [
 					FIELDS.UrlNMOS(urlLabel),
@@ -334,7 +419,7 @@ class GenericHttpInstance extends InstanceBase {
 						this.updateStatus(InstanceStatus.UnknownError, e.code)
 					}
 				},
-			},
+			},*/
 			patchTake: {
 				name: 'PATCH Take',
 				options: [
