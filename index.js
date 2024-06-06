@@ -12,6 +12,16 @@ class GenericHttpInstance extends InstanceBase {
 	configUpdated(config) {
 		this.config = config
 
+		this.setVariableDefinitions(
+			{
+				variableId: 'senderToTake',
+				name: `SenderToTake`,
+			},
+			{
+				variableId: 'receiverToTake',
+				name: `ReceiverToTake`,
+			},
+		)
 		this.executeGetSendersReceivers(config);
 
 		this.initActions()
@@ -442,38 +452,34 @@ class GenericHttpInstance extends InstanceBase {
 				callback: async (action, context) => {
 					const { urlnmos, options } = await this.prepareQuery(context, action, true)
 
-					const userInputUrl = action.options.urlnmos;
+					const userInputUrl = this.config.prefix;
 
 					const modifiedReceiversUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;
-					const receiverId = JSON.stringify(this.getVariableValue());
+					const receiverId = this.getVariableValue(receiverToTake);
 					const receiverIdUrl = `${modifiedReceiversUrl}/${receiverId}/staged`;
 			  
 					const modifiedSendersUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;
-					const senderId = '';
+					const senderId = this.getVariableValue(senderToTake);
 					const senderIdUrl = `${modifiedSendersUrl}/${senderId}`;
 					const sdpUrl = `${senderIdUrl}/transportfile`;
 
 					try {
-						const sdpFile = await fetch(sdpUrl);
-						const sdpString = await sdpFile.text();
+						const sdpFile = await got.get(sdpUrl);
+						const sdpString = JSON.stringify(sdpFile.body);
 
-						const jsonPayload = JSON.stringify({
+						const jsonPayload = {
 							sender_id: senderId,
 							master_enable: true,
-							activation: {
-								mode: 'activate_immediate',
-								requested_time: null
-							},
-							tranport_file: {
+							transport_file: {
 								data: sdpString,
 								type: "application/sdp",
 							}
-						});
+						};
 
 						// Log the body values
 						this.log('debug', `PATCH request body: ${jsonPayload}`);
 			  
-						action.options.body = jsonPayload;
+						action.options.json = jsonPayload;
 						action.options.header = {
 							'Content-Type': 'application/json',
 							...action.options.header,
