@@ -45,11 +45,15 @@ class GenericHttpInstance extends InstanceBase {
 			}
 	  
 			for (let i = 0; i < resultArray.length; i++) {
+				const variableId = `receiver-${i}`;
 			  	variablesDefinitions.push({
-					variableId: `sender-${i}`,
+					variableId: variableId,
 					name: `Sender ${i + 1}`,
 			  	});
-				variableIdsArray.push(`sender-${i}`);
+				this.setVariableDefinitions(variablesDefinitions);
+				this.setVariableValues({
+					[variableId]: resultArray[i]
+				});
 			}
 	  
 		  	this.updateStatus(InstanceStatus.Ok);
@@ -77,11 +81,15 @@ class GenericHttpInstance extends InstanceBase {
 		  	}
 	
 		  	for (let i = 0; i < resultArray.length; i++) {
+				const variableId = `receiver-${i}`;
 				variablesDefinitions.push({
-				  variableId: `receiver-${i}`,
+				  variableId: variableId,
 				  name: `Receiver ${i + 1}`,
 				});
-				variableIdsArray.push(`receiver-${i}`);
+				this.setVariableDefinitions(variablesDefinitions);
+				this.setVariableValues({
+					[variableId]: resultArray[i]
+				});
 		  	}
 	
 			this.updateStatus(InstanceStatus.Ok);
@@ -91,14 +99,14 @@ class GenericHttpInstance extends InstanceBase {
 	  		}
 
 		// Crée la variable personnalisée
-		this.setVariableDefinitions(variablesDefinitions);
+		/*this.setVariableDefinitions(variablesDefinitions);*/
 
-		for (let i = 0; i < variablesDefinitions.length; i++) {
+		/*for (let i = 0; i < variablesDefinitions.length; i++) {
 			variableIds = variableIdsArray[i];
 			this.setVariableValues({
 				variableIds: resultIdsArray[i]
 			});
-		}
+		}*/
 
 	}
 
