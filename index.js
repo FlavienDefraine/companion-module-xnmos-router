@@ -45,14 +45,15 @@ class GenericHttpInstance extends InstanceBase {
 			}
 	  
 			for (let i = 0; i < resultArray.length; i++) {
-				const variableId = `receiver-${i}`;
+				const variableId = `sender-${i}`;
+				const variableValue = resultArray[i].replace(/["\[\]\/]/g, ''); // supprime les caractères \", [, et ]
 			  	variablesDefinitions.push({
 					variableId: variableId,
 					name: `Sender ${i + 1}`,
 			  	});
 				this.setVariableDefinitions(variablesDefinitions);
 				this.setVariableValues({
-					[variableId]: resultArray[i]
+					[variableId]: variableValue
 				});
 			}
 	  
@@ -62,7 +63,7 @@ class GenericHttpInstance extends InstanceBase {
 		  		this.updateStatus(InstanceStatus.UnknownError, e.code);
 			}
 
-		const modifiedReceiversUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;  
+		const modifiedReceiversUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;
 		const receiversOptions = {
 			
 		};
@@ -82,13 +83,14 @@ class GenericHttpInstance extends InstanceBase {
 	
 		  	for (let i = 0; i < resultArray.length; i++) {
 				const variableId = `receiver-${i}`;
+				const variableValue = resultArray[i].replace(/["\[\]\/]/g, ''); // supprime les caractères \", [, et ]
 				variablesDefinitions.push({
-				  variableId: variableId,
-				  name: `Receiver ${i + 1}`,
+					variableId: variableId,
+				  	name: `Receiver ${i + 1}`,
 				});
 				this.setVariableDefinitions(variablesDefinitions);
 				this.setVariableValues({
-					[variableId]: resultArray[i]
+					[variableId]: variableValue
 				});
 		  	}
 	
@@ -467,6 +469,9 @@ class GenericHttpInstance extends InstanceBase {
 								type: "application/sdp",
 							}
 						});
+
+						// Log the body values
+						this.log('debug', `PATCH request body: ${jsonPayload}`);
 			  
 						action.options.body = jsonPayload;
 						action.options.header = {
