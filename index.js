@@ -44,7 +44,7 @@ class GenericHttpInstance extends InstanceBase {
 				// error stringifying
 			}
 	  
-			for (let i = 0; i < resultArray.length; i++) {
+			for (let i = variablesDefinitions.length; i < resultArray.length; i++) {
 				const variableId = `receiver-${i}`;
 			  	variablesDefinitions.push({
 					variableId: variableId,
@@ -80,7 +80,7 @@ class GenericHttpInstance extends InstanceBase {
 			  	// error stringifying
 		  	}
 	
-		  	for (let i = 0; i < resultArray.length; i++) {
+		  	for (let i = variablesDefinitions.length; i < resultArray.length; i++) {
 				const variableId = `receiver-${i}`;
 				variablesDefinitions.push({
 				  variableId: variableId,
