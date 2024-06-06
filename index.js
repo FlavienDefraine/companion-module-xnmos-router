@@ -445,7 +445,7 @@ class GenericHttpInstance extends InstanceBase {
 					const userInputUrl = action.options.urlnmos;
 
 					const modifiedReceiversUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;
-					const receiverId = '';
+					const receiverId = JSON.stringify(this.getVariableValue());
 					const receiverIdUrl = `${modifiedReceiversUrl}/${receiverId}/staged`;
 			  
 					const modifiedSendersUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;
