@@ -45,7 +45,7 @@ class GenericHttpInstance extends InstanceBase {
 			}
 	  
 			for (let i = 0; i < resultArray.length; i++) {
-				const variableId = `receiver-${i}`;
+				const variableId = `sender-${i}`;
 			  	variablesDefinitions.push({
 					variableId: variableId,
 					name: `Sender ${i + 1}`,
