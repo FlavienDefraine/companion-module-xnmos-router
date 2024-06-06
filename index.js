@@ -12,109 +12,94 @@ class GenericHttpInstance extends InstanceBase {
 	configUpdated(config) {
 		this.config = config
 
-		this.executeGetSenders(config);
-		this.executeGetReceivers(config);
+		this.executeGetSendersReceivers(config);
 
 		this.initActions()
 		this.initFeedbacks()
 	}
 
-	async executeGetSenders(config) {
+	async executeGetSendersReceivers(config) {
 		const userInputUrl = config.prefix;
-		const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;  
-		const options = {
+
+		let variableIdsArray = new Array();
+		let variablesDefinitions = new Array();
+		let resultIdsArray = new Array();
+
+		const modifiedSendersUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;  
+		const sendersOptions = {
 			
 		};
+		
 	  
 		try {
-		  	const response = await got.get(modifiedUrl, options);
+		  	const response = await got.get(modifiedSendersUrl, sendersOptions);
 	  
 			let resultData = response.body;
 			let resultArray = new Array();
 	  
 			try {
 				resultArray = resultData.split(",");
+				resultIdsArray.push(resultArray);
 			} catch (error) {
 				// error stringifying
 			}
-	  
-			// Crée les variables personnalisées dynamiquement
-			let variableIdsArray = new Array();
-			let variableIds;
-			let variablesDefinitions = new Array();
 	  
 			for (let i = 0; i < resultArray.length; i++) {
 			  	variablesDefinitions.push({
 					variableId: `sender-${i}`,
 					name: `Sender ${i + 1}`,
 			  	});
-				  variableIdsArray.push(`sender-${i}`);
+				variableIdsArray.push(`sender-${i}`);
 			}
-	  
-			// Crée la variable personnalisée
-			this.setVariableDefinitions(variablesDefinitions);
-
-			for (let i = 0; i < variablesDefinitions.length; i++) {
-				variableIds = variableIdsArray[i];
-				this.setVariableValues({
-					variableIds: resultArray[i]
-				});
-		  	}
 	  
 		  	this.updateStatus(InstanceStatus.Ok);
 		} catch (e) {
-		  	this.log('error', `HTTP GET Request failed (${e.message})`);
-		  	this.updateStatus(InstanceStatus.UnknownError, e.code);
-		}
-	}
+		  		this.log('error', `HTTP GET Request failed (${e.message})`);
+		  		this.updateStatus(InstanceStatus.UnknownError, e.code);
+			}
 
-	async executeGetReceivers(config) {
-		const userInputUrl = config.prefix;
-		const modifiedUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;  
-		const options = {
+		const modifiedReceiversUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;  
+		const receiversOptions = {
 			
 		};
-	  
-		try {
-		  	const response = await got.get(modifiedUrl, options);
-	  
-			let resultData = response.body;
-			let resultArray = new Array();
-	  
-			try {
-				resultArray = resultData.split(",");
-			} catch (error) {
-				// error stringifying
-			}
-	  
-			// Crée les variables personnalisées dynamiquement
-			let variableIdsArray = new Array();
-			let variableIds;
-			let variablesDefinitions = new Array();
-	  
-			for (let i = 0; i < resultArray.length; i++) {
-			  	variablesDefinitions.push({
-					variableId: `receiver-${i}`,
-					name: `Receiver ${i + 1}`,
-			  	});
-				  variableIdsArray.push(`receiver-${i}`);
-			}
-	  
-			// Crée la variable personnalisée
-			this.setVariableDefinitions(variablesDefinitions);
 
-			for (let i = 0; i < variablesDefinitions.length; i++) {
-				variableIds = variableIdsArray[i];
-				this.setVariableValues({
-					variableIds: resultArray[i]
-				});
+		try {
+			const response = await got.get(modifiedReceiversUrl, receiversOptions);
+	
+		  	let resultData = response.body;
+		  	let resultArray = new Array();
+	
+		  	try {
+			  	resultArray = resultData.split(",");
+				resultIdsArray.push(resultArray);
+		  	} catch (error) {
+			  	// error stringifying
 		  	}
-	  
-		  	this.updateStatus(InstanceStatus.Ok);
+	
+		  	for (let i = 0; i < resultArray.length; i++) {
+				variablesDefinitions.push({
+				  variableId: `receiver-${i}`,
+				  name: `Receiver ${i + 1}`,
+				});
+				variableIdsArray.push(`receiver-${i}`);
+		  	}
+	
+			this.updateStatus(InstanceStatus.Ok);
 		} catch (e) {
-		  	this.log('error', `HTTP GET Request failed (${e.message})`);
-		  	this.updateStatus(InstanceStatus.UnknownError, e.code);
+				this.log('error', `HTTP GET Request failed (${e.message})`);
+				this.updateStatus(InstanceStatus.UnknownError, e.code);
+	  		}
+
+		// Crée la variable personnalisée
+		this.setVariableDefinitions(variablesDefinitions);
+
+		for (let i = 0; i < variablesDefinitions.length; i++) {
+			variableIds = variableIdsArray[i];
+			this.setVariableValues({
+				variableIds: resultIdsArray[i]
+			});
 		}
+
 	}
 
 	init(config) {
