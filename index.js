@@ -12,41 +12,33 @@ class GenericHttpInstance extends InstanceBase {
 	configUpdated(config) {
 		this.config = config
 
-		this.setVariableDefinitions(
-			{
-				variableId: 'senderToTake',
-				name: `SenderToTake`,
-			},
-			{
-				variableId: 'receiverToTake',
-				name: `ReceiverToTake`,
-			},
-		)
-		this.executeGetSendersReceivers(config);
+		this.executeGetSendersReceivers(config); //Appeller une fonction a "l'update" du module
 
 		this.initActions()
 		this.initFeedbacks()
 	}
 
 	async executeGetSendersReceivers(config) {
-		const userInputUrl = config.prefix;
+		const userInputUrl = config.prefix; // Stocker l'ip d'un Device entrée par l'utilisateur dasn la config
 
 		let variableIdsArray = new Array();
 		let variablesDefinitions = new Array();
 		let resultIdsArray = new Array();
 
+		// Generer le chemin et les options pour la requette GenericHttp sur les Senders
 		const modifiedSendersUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;  
 		const sendersOptions = {
 			
 		};
 		
-	  
+		// Recuperer une liste de Senders pour un Device
 		try {
-		  	const response = await got.get(modifiedSendersUrl, sendersOptions);
+		  	const response = await got.get(modifiedSendersUrl, sendersOptions);// Requette http .get() via GenericHttp
 	  
 			let resultData = response.body;
 			let resultArray = new Array();
-	  
+			
+			// Generer une liste avec les IDs des Senders
 			try {
 				resultArray = resultData.split(",");
 				resultIdsArray.push(resultArray);
@@ -54,6 +46,7 @@ class GenericHttpInstance extends InstanceBase {
 				// error stringifying
 			}
 	  
+			// Creer un tableau de Senders en fonction de la taille de la liste d'IDs
 			for (let i = 0; i < resultArray.length; i++) {
 				const variableId = `sender-${i}`;
 				const variableValue = resultArray[i].replace(/["\[\]\/]/g, ''); // supprime les caractères \", [, et ]
@@ -61,6 +54,7 @@ class GenericHttpInstance extends InstanceBase {
 					variableId: variableId,
 					name: `Sender ${i + 1}`,
 			  	});
+				// Assigner les IDs au Senders en index dans le tableau
 				this.setVariableDefinitions(variablesDefinitions);
 				this.setVariableValues({
 					[variableId]: variableValue
@@ -73,17 +67,20 @@ class GenericHttpInstance extends InstanceBase {
 		  		this.updateStatus(InstanceStatus.UnknownError, e.code);
 			}
 
+		// Generer le chemin et les options pour la requette GenericHttp sur les Receivers
 		const modifiedReceiversUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;
 		const receiversOptions = {
 			
 		};
 
+		// Recuperer une liste de Senders pour un Device
 		try {
 			const response = await got.get(modifiedReceiversUrl, receiversOptions);
 	
 		  	let resultData = response.body;
 		  	let resultArray = new Array();
 	
+			// Generer une liste avec les IDs des Rceivers
 		  	try {
 			  	resultArray = resultData.split(",");
 				resultIdsArray.push(resultArray);
@@ -91,6 +88,7 @@ class GenericHttpInstance extends InstanceBase {
 			  	// error stringifying
 		  	}
 	
+			// Creer un tableau de Receivers en fonction de la taille de la liste d'IDs
 		  	for (let i = 0; i < resultArray.length; i++) {
 				const variableId = `receiver-${i}`;
 				const variableValue = resultArray[i].replace(/["\[\]\/]/g, ''); // supprime les caractères \", [, et ]
@@ -98,6 +96,7 @@ class GenericHttpInstance extends InstanceBase {
 					variableId: variableId,
 				  	name: `Receiver ${i + 1}`,
 				});
+				// Assigner les IDs au Senders en index dans le tableau
 				this.setVariableDefinitions(variablesDefinitions);
 				this.setVariableValues({
 					[variableId]: variableValue
@@ -109,17 +108,6 @@ class GenericHttpInstance extends InstanceBase {
 				this.log('error', `HTTP GET Request failed (${e.message})`);
 				this.updateStatus(InstanceStatus.UnknownError, e.code);
 	  		}
-
-		// Crée la variable personnalisée
-		/*this.setVariableDefinitions(variablesDefinitions);*/
-
-		/*for (let i = 0; i < variablesDefinitions.length; i++) {
-			variableIds = variableIdsArray[i];
-			this.setVariableValues({
-				variableIds: resultIdsArray[i]
-			});
-		}*/
-
 	}
 
 	init(config) {
@@ -366,6 +354,21 @@ class GenericHttpInstance extends InstanceBase {
 							}
 
 							this.setCustomVariableValue(jsonResultDataVariable, resultData)
+
+							// Crée les variables personnalisées dynamiquement
+							const variablesDefinitions = []; // déclare le tableau avant la boucle
+
+							for (let i = 0; i < resultData.length; i++) {
+  								variablesDefinitions.push({ // utilise push pour ajouter un nouvel élément au tableau
+    								id: `sender-${i}`,
+								    name: `Sender ${i + 1}`,
+								    type: 'string',
+    								value: resultData[i],
+  								});
+							}
+
+							// Crée la variable personnalisée
+							this.setVariableDefinitions(variablesDefinitions);
 						}
 
 						this.updateStatus(InstanceStatus.Ok)
@@ -452,43 +455,46 @@ class GenericHttpInstance extends InstanceBase {
 				callback: async (action, context) => {
 					const { urlnmos, options } = await this.prepareQuery(context, action, true)
 
-					const userInputUrl = this.config.prefix;
+					const userInputUrl = this.config.prefix; // Stocker l'ip d'un Device entrée par l'utilisateur dasn la config
 
+					// Generer le chemin pour la requette .path() GenericHttp sur les Receivers
 					const modifiedReceiversUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/receivers`;
-					const receiverId = this.getVariableValue(receiverToTake);
+					const receiverId = this.getVariableValue('custom_receiverToTake'); // Recuperer l'ID stocké dans la customVariable receiverToTake
 					const receiverIdUrl = `${modifiedReceiversUrl}/${receiverId}/staged`;
 			  
 					const modifiedSendersUrl = `http://${userInputUrl}/x-nmos/connection/v1.0/single/senders`;
-					const senderId = this.getVariableValue(senderToTake);
+					const senderId = this.getVariableValue('custom_senderToTake'); // Recuperer l'ID stocké dans la customVariable senderToTake
 					const senderIdUrl = `${modifiedSendersUrl}/${senderId}`;
-					const sdpUrl = `${senderIdUrl}/transportfile`;
+					const sdpUrl = `${senderIdUrl}/transportfile`;// Chemin vers le ficher SDP du Sender
 
 					try {
 						const sdpFile = await got.get(sdpUrl);
-						const sdpString = JSON.stringify(sdpFile.body);
+						const sdpString = JSON.stringify(sdpFile.body); // Recuperer le contenu du fichier SDP en chaine de caracteres
 
-						const jsonPayload = {
+						// Generer un payload JSON pour le body de la requete patch en application/json
+						const jsonPayload = JSON.stringify({
 							sender_id: senderId,
 							master_enable: true,
 							transport_file: {
 								data: sdpString,
 								type: "application/sdp",
 							}
-						};
+						});
 
 						// Log the body values
-						this.log('debug', `PATCH request body: ${jsonPayload}`);
-			  
-						action.options.json = jsonPayload;
+						
+						// Donner le payload et le header en 'options' de la requete patch
+						action.options.body = jsonPayload;
 						action.options.header = {
 							'Content-Type': 'application/json',
-							...action.options.header,
 						};
-
+						
+						// Requete patch de GenericHttp a l'url avec le body et l'header 
 						await got.patch(receiverIdUrl, options)
 			  
 						this.updateStatus(InstanceStatus.Ok)
 					} catch (e) {
+						this.log('debug', `PATCH request body: ${jsonPayload}`);
 						this.log('error', `Error downloading file: ${e}`)
 						this.log('error', `HTTP PATCH Request failed (${e.message})`)
 						this.updateStatus(InstanceStatus.UnknownError, e.code)
