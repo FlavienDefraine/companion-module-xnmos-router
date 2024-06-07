@@ -73,7 +73,7 @@ class GenericHttpInstance extends InstanceBase {
 			
 		};
 
-		// Recuperer une liste de Senders pour un Device
+		// Recuperer une liste de Receivers pour un Device
 		try {
 			const response = await got.get(modifiedReceiversUrl, receiversOptions);
 	
