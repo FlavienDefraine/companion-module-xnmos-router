@@ -1,6 +1,6 @@
 {
 	"name": "ina-xnmos-router",
-	"version": "0.0.1",
+	"version": "0.4.2",
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
@@ -8,7 +8,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Luadei/companion-module-ina-xnmos-router.git"
+		"url": "git+https://github.com/FlavienDefraine/companion-module-xnmos-router.git"
 	},
 	"license": "MIT",
 	"dependencies": {

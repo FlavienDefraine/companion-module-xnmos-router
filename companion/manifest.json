@@ -5,12 +5,17 @@
 	"description": "2110 router through http requests on nmos serveur",
 	"version": "0.4.2",
 	"license": "MIT",
-	"repository": "git+https://github.com/Luadei/companion-module-ina-xnmos-router.git",
-	"bugs": "https://github.com/Luadei/companion-module-ina-xnmos-router/issues",
+	"repository": "git+https://github.com/FlavienDefraine/companion-module-xnmos-router.git",
+	"bugs": "https://github.com/FlavienDefraine/companion-module-xnmos-router/issues",
 	"maintainers": [
 		{
-			"name": "Luadei",
-			"email": "lucas.despin@ensea.fr"
+			"name": "Lucas"
+		},
+		{
+			"name": "Flavien"
+		},
+		{
+			"name": "Mike"
 		}
 	],
 	"legacyIds": [],
